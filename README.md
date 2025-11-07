@@ -2,6 +2,36 @@
 
 A production-ready multi-user drawing application with real-time synchronization, global undo/redo, and advanced conflict resolution.
 
+#Table of contents
+
+Overview
+
+Features
+
+Tech Stack
+
+Quickstart (local)
+
+Usage
+
+Project structure
+
+Architecture & sync strategy
+
+Undo / Redo semantics
+
+Performance optimizations
+
+Known limitations
+
+Scaling considerations
+
+Deployment
+
+Development notes & testing
+
+Contributing
+
 ## Features
 
 - **Real-Time Drawing Sync**: See other users' drawings instantly as they draw
