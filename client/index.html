@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collaborative Drawing Canvas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app" class="app">
+    <!-- Header with Connection Status -->
+    <div class="header">
+      <div class="header-content">
+        <div class="branding">
+          <div class="logo">🎨</div>
+          <h1>Canvas Studio</h1>
+        </div>
+        <div id="status-bar" class="status-bar">
+          <div id="connection-status" class="status connecting">
+            <span class="status-dot"></span>
+            <span id="connection-text">Connecting...</span>
+          </div>
+          <div class="status-details">
+            <span class="detail-item">
+              <span class="detail-label">Room:</span>
+              <span id="room-id" class="detail-value">-</span>
+            </span>
+            <span class="separator">•</span>
+            <span class="detail-item">
+              <span class="detail-label">User:</span>
+              <span id="user-id" class="detail-value">-</span>
+            </span>
+            <span class="separator">•</span>
+            <span class="detail-item">
+              <span class="detail-label">Latency:</span>
+              <span id="latency" class="detail-value latency-value">--</span>ms
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+      <!-- Toolbar -->
+      <div class="toolbar-wrapper">
+        <div id="toolbar" class="toolbar">
+          <!-- Drawing Tools Section -->
+          <div class="toolbar-section">
+            <div class="section-label">Tools</div>
+            <div class="tool-group">
+              <button id="brush-tool" class="tool-btn active" title="Brush (B)">
+                <span class="tool-icon">✏️</span>
+                <span class="tool-label">Brush</span>
+              </button>
+              <button id="eraser-tool" class="tool-btn" title="Eraser (E)">
+                <span class="tool-icon">🧹</span>
+                <span class="tool-label">Eraser</span>
+              </button>
+              <button id="clear-btn" class="tool-btn" title="Clear Canvas">
+                <span class="tool-icon">🗑️</span>
+                <span class="tool-label">Clear</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Style Section -->
+          <div class="toolbar-section">
+            <div class="section-label">Style</div>
+            <div class="tool-group style-controls">
+              <div class="color-control">
+                <label for="color-picker" class="color-label">Color</label>
+                <input type="color" id="color-picker" class="color-picker" value="#000000" title="Color">
+              </div>
+              <div class="stroke-control">
+                <label for="stroke-width" class="stroke-label">Width: <span id="stroke-value">3</span>px</label>
+                <input type="range" id="stroke-width" class="stroke-width" min="1" max="50" value="3" title="Stroke Width">
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Section -->
+          <div class="toolbar-section">
+            <div class="section-label">Edit</div>
+            <div class="tool-group">
+              <button id="undo-btn" class="tool-btn" title="Undo (Ctrl+Z)">
+                <span class="tool-icon">↶</span>
+                <span class="tool-label">Undo</span>
+              </button>
+              <button id="redo-btn" class="tool-btn" title="Redo (Ctrl+Shift+Z)">
+                <span class="tool-icon">↷</span>
+                <span class="tool-label">Redo</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Metrics Section -->
+          <div class="toolbar-section metrics-section">
+            <div class="section-label">Stats</div>
+            <div id="metrics" class="metrics">
+              <span id="fps-display" class="metric-item">
+                <span class="metric-label">FPS:</span>
+                <span class="metric-value">60</span>
+              </span>
+              <span id="strokes-display" class="metric-item">
+                <span class="metric-label">Strokes:</span>
+                <span class="metric-value">0</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas and Users Panel -->
+      <div class="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+        
+        <!-- Users Panel -->
+        <div id="users-panel" class="users-panel">
+          <div class="panel-header">
+            <h3>Active Users</h3>
+            <span id="user-count" class="user-count">0</span>
+          </div>
+          <div id="users-list" class="users-list"></div>
+          <div class="panel-footer">
+            <button id="copy-link-btn" class="copy-link-btn" title="Copy room link">
+              <span class="btn-icon">🔗</span>
+              Share Room
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification"></div>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
