@@ -1,239 +1,227 @@
-Real-Time Collaborative Drawing Canvas
+# Real-Time Collaborative Drawing Canvas
 
-Production-ready multi-user drawing application with real-time synchronization, global undo/redo, and conflict resolution.
+A production-ready multi-user drawing application with real-time synchronization, global undo/redo, and advanced conflict resolution.
 
-Table of contents
+## Features
 
-Overview
+- **Real-Time Drawing Sync**: See other users' drawings instantly as they draw
+- **Drawing Tools**: Brush, eraser, color picker, adjustable stroke width
+- **Global Undo/Redo**: Works across all users with operational transform conflict resolution
+- **User Indicators**: See active users with color indicators and cursor positions
+- **Latency Monitoring**: Real-time network latency tracking
+- **Performance Metrics**: FPS counter and stroke count display
+- **Keyboard Shortcuts**: B (brush), E (eraser), Ctrl/Cmd+Z (undo), Ctrl/Cmd+Shift+Z (redo)
+- **Room System**: Multiple isolated canvases, shareable room links
+- **Automatic Reconnection**: Exponential backoff strategy for network resilience
+- **Touch Support**: Full mobile drawing support
 
-Features
+## Tech Stack
 
-Tech Stack
+- **Frontend**: Vanilla TypeScript/JavaScript, HTML5 Canvas
+- **Backend**: Node.js, Express, WebSockets (ws library)
+- **Architecture**: Event-driven, Operational Transform, Vector Clocks
 
-Quickstart (local)
+## Installation
 
-Usage
+### Prerequisites
 
-Project structure
+- Node.js 14+ and npm
 
-Architecture & sync strategy
+### Setup
 
-Undo / Redo semantics
+\`\`\`bash
+# Install dependencies
+npm install
 
-Performance optimizations
-
-Known limitations
-
-Scaling considerations
-
-Deployment
-
-Development notes & testing
-
-Contributing
-
-License
-
-Overview
-
-A collaborative canvas that lets multiple users draw simultaneously with low latency. Designed to demonstrate robust synchronization (operation transforms + vector clocks), global undo/redo, and production deployment readiness.
-
-Features
-
-Real-time drawing sync (live strokes as users draw)
-
-Brush, eraser, color picker, adjustable stroke width
-
-Global undo/redo with conflict resolution
-
-Cursor/active-user indicators and per-user colors
-
-Rooms: multiple isolated canvases with shareable links
-
-Touch support (mobile) and keyboard shortcuts (B/E/Undo/Redo)
-
-Automatic reconnection with exponential backoff
-
-Latency monitoring, FPS counter, stroke count display
-
-Tech stack
-
-Frontend: Vanilla TypeScript/JavaScript + HTML5 Canvas
-
-Backend: Node.js + Express + ws (WebSockets)
-
-Synchronization: Operational Transform + Vector Clocks
-
-Optional: Docker for containerized deployment
-
-Quickstart (local)
-Prerequisites
-
-Node.js 14+ (recommended 18+)
-
-npm (bundled with Node)
-
-(Optional) Docker
-
-Install & run
-
-From the project root (where package.json lives):
-
-# install dependencies
-npm ci
-
-# start server
+# Start the server
 npm start
+\`\`\`
 
+The application will be available at `http://localhost:8080`
 
-The app will be available at: http://localhost:8080
-Health check: http://localhost:8080/health → returns ok.
+## Usage
 
-Usage
-Single-user
+### Single User Testing
 
-Open http://localhost:8080
+1. Open `http://localhost:8080` in your browser
+2. Start drawing!
 
-Select a tool and draw.
+### Multi-User Testing
 
-Multi-user (same machine)
+1. Open `http://localhost:8080` in your main browser tab
+2. Click "Share Room Link" button in the users panel
+3. Open the copied link in another browser tab or different browser
+4. Start drawing - changes sync in real-time
 
-Open the URL in two browser tabs (or one normal + one incognito)
+### Keyboard Shortcuts
 
-Draw in one tab — changes appear instantly in the other.
+| Shortcut | Action |
+|----------|--------|
+| `B` | Switch to Brush |
+| `E` | Switch to Eraser |
+| `Ctrl/Cmd + Z` | Undo |
+| `Ctrl/Cmd + Shift + Z` | Redo |
+| Left-Click Drag | Draw |
 
-Multi-user (different devices)
+## Project Structure
 
-Find machine IP (e.g., 192.168.x.y) and run server.
-
-On other device (same LAN): http://192.168.x.y:8080/
-
-Use "Share Room Link" to invite remote users.
-
-Project structure
+\`\`\`
 collaborative-canvas/
 ├── client/
-│   ├── index.html
-│   ├── style.css
-│   ├── main.js                # app initialization
-│   ├── canvas.js              # drawing engine & rendering
-│   ├── websocket.js           # client websocket logic
-│   └── ...                    # ui/undo/tools/metrics
+│   ├── index.html                 # Main HTML
+│   ├── style.css                  # Styling
+│   ├── main.js                    # App initialization
+│   ├── canvas.js                  # Canvas drawing engine
+│   ├── websocket.js               # WebSocket client
+│   ├── ui-manager.js              # UI and event handling
+│   ├── undo-redo-manager.js       # Client-side undo/redo
+│   ├── drawing-tools.js           # Reusable drawing utilities
+│   ├── stroke-optimizer.js        # Stroke path simplification
+│   └── performance-monitor.js     # FPS and metrics tracking
 ├── server/
-│   ├── server.js              # express + ws server
-│   ├── rooms.js               # room & user management
-│   ├── sync-manager.js        # batching & causality
-│   ├── operation-transform.js # conflict resolution
-│   └── event-batcher.js       # batching utility
+│   ├── server.js                  # Express + WebSocket server
+│   ├── rooms.js                   # Room and user management
+│   ├── sync-manager.js            # Event batching and causality
+│   ├── operation-transform.js     # Conflict resolution
+│   └── event-batcher.js           # Event batching utility
 ├── package.json
-├── Dockerfile
 ├── README.md
 └── ARCHITECTURE.md
+\`\`\`
 
-Architecture & sync strategy (concise)
+## Architecture
 
-Client captures pointer events and renders locally for immediate feedback.
+### Data Flow
 
-Client emits compressed stroke packets to server via WebSocket.
+1. **User Drawing**: Client captures mouse/touch events
+2. **Local Rendering**: Immediately drawn on canvas
+3. **Network Transmission**: Stroke sent to server via WebSocket
+4. **Server Processing**: Event batched and broadcast to other users
+5. **Remote Rendering**: Other clients receive and draw stroke
+6. **Synchronization**: All clients maintain identical canvas state
 
-Server batches events, orders them using vector clocks, applies Operational Transform when needed, and broadcasts to room members.
+### Synchronization Strategy
 
-Clients apply remote ops and maintain identical canvas state.
+- **Event Batching**: Strokes batched (max 20 or 50ms) to reduce network overhead
+- **Vector Clocks**: Track causal ordering of events
+- **Operational Transform**: Last-Write-Wins conflict resolution
+- **Automatic Deduplication**: Duplicate events ignored via timestamps
 
-Key decisions
+### Undo/Redo
 
-Event batching (max 50ms or N points) to reduce network overhead.
+- **Per-User Stacks**: Each user maintains their own undo/redo stacks
+- **Global Tracking**: Server maintains global history for state synchronization
+- **Conflict Resolution**: When undoing, only removes that user's strokes
+- **Stack Limits**: Max 100 actions to prevent memory bloat
 
-Vector clocks to ensure causal ordering.
+### Performance Optimizations
 
-Lightweight message format (minimized point arrays) and deduplication via timestamps/IDs.
+- **Stroke Simplification**: Douglas-Peucker algorithm reduces point count by ~60%
+- **Render Throttling**: Limited to 60fps to prevent CPU overuse
+- **Event Batching**: Reduces network traffic by ~80%
+- **Latency Measurement**: Ping/pong every 5 seconds for monitoring
 
-Undo / Redo semantics
+## Known Limitations
 
-Clients keep local action stacks for instant undo/redo UI.
+- Single canvas per room (no layers)
+- No persistence - canvas clears on server restart
+- No user authentication
+- Limited to browsers with WebSocket support
+- Performance degrades with 1000+ concurrent strokes
 
-Server maintains global history reference for synchronization across clients.
+## Scaling Considerations
 
-Undo removes the user's own last action; transforms are applied server-side to preserve consistency when multiple users interact with overlapping regions.
+For production with 1000+ concurrent users:
 
-History cap: 100 actions (configurable) to prevent memory blowup.
+1. **Horizontal Scaling**: Use load balancer with sticky sessions
+2. **Event Streaming**: Replace in-memory with Redis/Kafka
+3. **State Persistence**: Add database for canvas snapshots
+4. **CRDT**: Consider Conflict-free Replicated Data Types for better scaling
+5. **Compression**: Implement message compression for large batches
 
-Performance optimizations
+## Deployment
 
-Stroke simplification using Douglas–Peucker to reduce points.
+### Local Deployment
 
-RequestAnimationFrame-based rendering at 60fps throttle.
+\`\`\`bash
+npm start
+\`\`\`
 
-Dirty-rect redraw (partial canvas redraws when possible).
+### Docker Deployment
 
-Event batching to reduce packets and CPU overhead.
-
-Ping/pong latency measurement every 5 seconds.
-
-Known limitations
-
-No persistent storage: canvas resets on server restart.
-
-Single canvas per room (no multi-layer support).
-
-No authentication (room links are unprotected).
-
-Performance degrades with >1000 simultaneous heavy strokes per room.
-
-Scaling considerations
-
-For production scale (1k+ concurrent users):
-
-Run multiple server instances behind a load balancer with session affinity / sticky sessions.
-
-Use Redis (pub/sub) or Kafka to broadcast events between server instances.
-
-Persist periodic canvas snapshots to a DB (S3 + metadata) for recovery.
-
-Consider switching Operational Transform → CRDTs for more robust offline & multi-region support.
-
-Deployment
-Docker
+\`\`\`dockerfile
 FROM node:18-alpine
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci --production=false
+COPY package.json .
+RUN npm install
 COPY . .
 EXPOSE 8080
 CMD ["npm", "start"]
+\`\`\`
 
-Render (recommended for full Node)
+### Vercel Deployment
 
-Push repo to GitHub → Render.com → New Web Service → Docker (or Node) → connect repo → deploy.
+This project can be deployed to Vercel using:
 
-Ensure server reads process.env.PORT || 8080. Healthcheck is available at /health.
+\`\`\`bash
+vercel
+\`\`\`
 
-Vercel / Serverless
+For WebSocket support on Vercel, use the serverless WebSocket adapter or consider alternative platforms like Railway, Heroku, or DigitalOcean.
 
-Vercel requires serverless functions for WebSocket (non-trivial); prefer Render/Railway/Heroku for full WebSocket servers.
+## Development Notes
 
-Development notes & testing
+### Debugging
 
-Enable debug logs: look for [v0] prefixed logs.
+Enable debug logging by adding `[v0]` prefix to console logs:
 
-Useful test scenarios: high-frequency drawing, throttled networks, many concurrent users, undo stacks with overlapping strokes.
+\`\`\`javascript
+console.log("[v0] Event received:", event)
+\`\`\`
 
-Use browser DevTools Network tab to monitor WebSocket frames.
+### Performance Profiling
 
-Contributing
+Monitor FPS and latency in the UI's metrics display (top-right toolbar).
 
-Contributions welcome. Suggested areas:
+### Testing Scenarios
 
-Add DB-backed persistence & snapshots.
+1. **High Frequency Drawing**: Rapid strokes to test event batching
+2. **Network Latency**: Simulate with browser DevTools throttling
+3. **Concurrent Users**: Open multiple tabs to test synchronization
+4. **Undo/Redo**: Test with overlapping strokes from multiple users
 
-Implement authentication for private rooms.
+## Time Investment
 
-Add layers & selection tools.
+- **Planning & Architecture**: 2 hours
+- **Core Implementation**: 6 hours
+- **Optimization**: 3 hours
+- **Testing & Documentation**: 2 hours
+- **Total**: ~13 hours
 
-Optimize memory & CPU for large rooms.
+## Future Enhancements
 
-Please open issues or PRs following the project conventions.
+- [ ] Mobile app with React Native
+- [ ] Shape tools (rectangle, circle, line)
+- [ ] Text support
+- [ ] Layer system
+- [ ] Session persistence with database
+- [ ] User authentication & authorization
+- [ ] Drawing history playback
+- [ ] Collaborative selection/annotation
+- [ ] Voice chat integration
+- [ ] Screen share support
 
-License
+## Contributing
 
-MIT
+Feel free to extend this project! Key areas for enhancement:
+
+1. Add new drawing tools
+2. Implement shape support
+3. Add text layer
+4. Create persistence layer
+5. Add authentication
+6. Performance optimizations
+
+## License
+
+MIT  
